@@ -50,8 +50,9 @@ services:
       build:
         context: .
         dockerfile: Dockerfile
+      image: my_airflow_webserver
       container_name: airflow_scheduler
-      
+      restart: always
       depends_on:
         - webserver
         - redis
@@ -78,6 +79,7 @@ volumes:
 
 networks:
   airflow_network:
+    name: airflow_network
     driver: bridge
     ipam:
         driver: default

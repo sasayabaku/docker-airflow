@@ -74,12 +74,10 @@ $ docker-compose up -d --build
 しかし、この状態では、Airflowユーザが作れられていないので起動に失敗します。
 
 ### Airflowユーザの作成
-
-```bash
-
-$ docker exec -it airflow_webserver bash
-```
 Bashでログイン。
+```bash
+docker run -it --rm --net=airflow_network my_airflow_webserver bash
+```
 
 以下コンテナ内
 
@@ -96,8 +94,13 @@ $ airflow users create \
 この後、パスワードを要求されます。
 ```
 
-## Web Server と Schedulerを起動
+## Web Serverにログイン
 
-```bash
-$ docker-compose restart 
+webserverとschedularに、
+```yaml
+restart: always
 ```
+を設定しているため、正常稼働するまで再起動するので、
+
+http://localhost:8080
+でWeb Serverにログインできるようになる。
