@@ -61,7 +61,7 @@ services:
 
       volumes:
         - ./airflow:/usr/local/airflow
-      
+
       networks:
         airflow_network:
           ipv4_address: 192.168.10.4
