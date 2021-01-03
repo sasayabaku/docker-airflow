@@ -1,0 +1,89 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:9.6
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+
+    container_name: airflow_postgres
+
+    volumes:
+      - airflow_db:/var/lib/postgresql/data
+
+    networks:
+      airflow_network:
+        ipv4_address: 192.168.10.2
+
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my_airflow_webserver
+    container_name: airflow_webserver
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+    
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    
+    volumes:
+      - ./work:/work
+      - ./airflow:/usr/local/airflow
+    
+    ports:
+      - "8080:8080"
+
+    command: ['airflow', 'webserver', '--port', '8080']
+
+    networks:
+      airflow_network:
+        ipv4_address: 192.168.10.3
+
+
+  scheduler:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      image: my_airflow_webserver
+      container_name: airflow_scheduler
+      restart: always
+      depends_on:
+        - webserver
+        - redis
+
+      restart: always
+
+      networks:
+        airflow_network:
+          ipv4_address: 192.168.10.4
+
+      command: ['airflow', 'scheduler']
+
+  redis:
+    image: redis:6.0.9-alpine
+    container_name: airflow_redis
+
+    networks:
+      airflow_network:
+        ipv4_address: 192.168.10.5
+
+volumes:
+  airflow_db:
+    name: airflow_db
+
+networks:
+  airflow_network:
+    name: airflow_network
+    driver: bridge
+    ipam:
+        driver: default
+        config:
+          - subnet: 192.168.10.0/24
+            gateway: 192.168.10.1
+    
